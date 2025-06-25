@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "READ",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "prod": "cross-env PORT=80 node server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^3.0.0",
+    "nanoid": "^5.1.5",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "@koa/cors": "^5.0.0",
+    "koa-body": "^6.0.1",
+    "koa-json": "^2.0.2"
+  }
+}
