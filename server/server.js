@@ -1,4 +1,5 @@
 import Koa from 'koa';
+import cors from '@koa/cors';
 import http from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
 import ChatRepository from './ChatRepository.js';
@@ -14,6 +15,11 @@ const wss = new WebSocketServer({ server });
 const chatRepository = new ChatRepository();
 const users = new UserRepository();
 
+app.use(cors({
+  origin: '*',
+  credentials: true
+}));
+
 
 wss.on('connection', socket => {
   console.log('Новый клиент подключился!');
@@ -22,7 +28,7 @@ wss.on('connection', socket => {
 
     try {
       const message = JSON.parse(rawMsg);
-      message.time = new Date().toLocaleString();
+      message.time = new Date().toISOString();
       console.log('Получено от клиента:', message);
 
       if(message.type === 'register') {
@@ -70,7 +76,7 @@ wss.on('connection', socket => {
           type: 'message',
           sender: username,
           content: message.content,
-          time: new Date().toLocaleString()
+          time: new Date().toISOString()
         };
         
         chatRepository.addMessage(msgData);

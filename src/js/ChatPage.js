@@ -40,6 +40,8 @@ export default class ChatPage {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message');
 
+    const formattedTime = this.formatDateTime(message.time);
+
     if (message.sender === this.username) {
         message.sender = 'You';
         msgDiv.style.textAlign = 'right';
@@ -55,9 +57,11 @@ export default class ChatPage {
         msgDiv.innerHTML = `<div class="message_info">${message.sender} покинул чат</div>`;
         break;
       case 'message':
-        msgDiv.innerHTML = `<div class="message_info">${message.sender}, ${message.time}</div>
+        msgDiv.innerHTML = `<div class="message_info">${message.sender}, ${formattedTime}</div>
                             <div class="message_content">${message.content}</div>`;
+
         if (message.sender === 'You') msgDiv.querySelector('.message_info').style.color = 'red';
+        
         break;
       default:
         msgDiv.textContent = JSON.stringify(message);
@@ -123,6 +127,21 @@ export default class ChatPage {
         <div class="user_icon"></div>
         <div class="user_name">${user}</div>
     `;
+  }
+
+  formatDateTime(isoString) {
+    const date = new Date(isoString);
+    
+    const timezoneOffset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - timezoneOffset);
+    
+    const hours = localDate.getHours().toString().padStart(2, '0');
+    const minutes = localDate.getMinutes().toString().padStart(2, '0');
+    const day = localDate.getDate().toString().padStart(2, '0');
+    const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = localDate.getFullYear().toString().slice(-2);
+    
+    return `${hours}:${minutes} ${day}.${month}.${year}`;
   }
 
   scrollToBottom() {

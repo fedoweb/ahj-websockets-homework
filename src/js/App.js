@@ -10,7 +10,7 @@ export default class App {
   }
 
   async init() {
-    this.socket = new WebSocket("ws://localhost:3030/ws");
+    this.socket = new WebSocket("wss://ahj-websockets-homework.onrender.com/ws");
 
     this.indexPage.init(this.root);
 
