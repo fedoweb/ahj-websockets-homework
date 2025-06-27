@@ -40,7 +40,7 @@ export default class ChatPage {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message');
 
-    const formattedTime = this.formatDateTime(message.time);
+    const formattedTime = this.formatTime(message.time);
 
     if (message.sender === this.username) {
         message.sender = 'You';
@@ -61,7 +61,7 @@ export default class ChatPage {
                             <div class="message_content">${message.content}</div>`;
 
         if (message.sender === 'You') msgDiv.querySelector('.message_info').style.color = 'red';
-        
+
         break;
       default:
         msgDiv.textContent = JSON.stringify(message);
@@ -129,20 +129,38 @@ export default class ChatPage {
     `;
   }
 
-  formatDateTime(isoString) {
+  formatTime(isoString) {
     const date = new Date(isoString);
     
-    const timezoneOffset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - timezoneOffset);
+    // Автоматическое определение часового пояса пользователя
+    const options = {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
     
-    const hours = localDate.getHours().toString().padStart(2, '0');
-    const minutes = localDate.getMinutes().toString().padStart(2, '0');
-    const day = localDate.getDate().toString().padStart(2, '0');
-    const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
-    const year = localDate.getFullYear().toString().slice(-2);
-    
-    return `${hours}:${minutes} ${day}.${month}.${year}`;
+    return new Intl.DateTimeFormat('ru-RU', options)
+      .format(date)
+      .replace(',', '');
   }
+
+  // formatDateTime(isoString) {
+  //   const date = new Date(isoString);
+    
+  //   const timezoneOffset = date.getTimezoneOffset() * 60000;
+  //   const localDate = new Date(date.getTime() - timezoneOffset);
+    
+  //   const hours = localDate.getHours().toString().padStart(2, '0');
+  //   const minutes = localDate.getMinutes().toString().padStart(2, '0');
+  //   const day = localDate.getDate().toString().padStart(2, '0');
+  //   const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
+  //   const year = localDate.getFullYear().toString().slice(-2);
+    
+  //   return `${hours}:${minutes} ${day}.${month}.${year}`;
+  // }
 
   scrollToBottom() {
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
