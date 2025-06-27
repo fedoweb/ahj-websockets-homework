@@ -750,7 +750,7 @@ var ChatPage = /*#__PURE__*/function () {
     value: function renderMessage(message) {
       var msgDiv = document.createElement('div');
       msgDiv.classList.add('message');
-      var formattedTime = this.formatDateTime(message.time);
+      var formattedTime = this.formatTime(message.time);
       if (message.sender === this.username) {
         message.sender = 'You';
         msgDiv.style.textAlign = 'right';
@@ -809,18 +809,36 @@ var ChatPage = /*#__PURE__*/function () {
       return "\n        <div class=\"user_icon\"></div>\n        <div class=\"user_name\">".concat(user, "</div>\n    ");
     }
   }, {
-    key: "formatDateTime",
-    value: function formatDateTime(isoString) {
+    key: "formatTime",
+    value: function formatTime(isoString) {
       var date = new Date(isoString);
-      var timezoneOffset = date.getTimezoneOffset() * 60000;
-      var localDate = new Date(date.getTime() - timezoneOffset);
-      var hours = localDate.getHours().toString().padStart(2, '0');
-      var minutes = localDate.getMinutes().toString().padStart(2, '0');
-      var day = localDate.getDate().toString().padStart(2, '0');
-      var month = (localDate.getMonth() + 1).toString().padStart(2, '0');
-      var year = localDate.getFullYear().toString().slice(-2);
-      return "".concat(hours, ":").concat(minutes, " ").concat(day, ".").concat(month, ".").concat(year);
+
+      // Автоматическое определение часового пояса пользователя
+      var options = {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      return new Intl.DateTimeFormat('ru-RU', options).format(date).replace(',', '');
     }
+
+    // formatDateTime(isoString) {
+    //   const date = new Date(isoString);
+
+    //   const timezoneOffset = date.getTimezoneOffset() * 60000;
+    //   const localDate = new Date(date.getTime() - timezoneOffset);
+
+    //   const hours = localDate.getHours().toString().padStart(2, '0');
+    //   const minutes = localDate.getMinutes().toString().padStart(2, '0');
+    //   const day = localDate.getDate().toString().padStart(2, '0');
+    //   const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
+    //   const year = localDate.getFullYear().toString().slice(-2);
+
+    //   return `${hours}:${minutes} ${day}.${month}.${year}`;
+    // }
   }, {
     key: "scrollToBottom",
     value: function scrollToBottom() {
