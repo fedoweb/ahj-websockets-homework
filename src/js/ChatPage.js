@@ -5,83 +5,86 @@ export default class ChatPage {
     this.messageInput = null;
     this.socket = null;
     this.username = null;
+    this.usersContainer = null;
   }
 
-  init(container, username) {
-    if (!container || !username) return;
+  init(container, username, socket) {
+    if (!container || !username || !socket) return;
+
     this.username = username;
+    this.socket = socket;
     container.innerHTML = '';
     container.insertAdjacentHTML('beforeend', this.createElement());
 
     this.messagesContainer = document.querySelector('.messages');
-    this.messageForm = document.querySelector('.message-form');
-    this.messageInput = document.querySelector('.message-input');
+    this.messageForm = document.querySelector('.message_form');
+    this.messageInput = document.querySelector('.message_input');
+    this.usersContainer = document.querySelector('.users_container');
 
     this.messageForm.addEventListener('submit', this.onSendMessage.bind(this));
 
-    this.connectWebsocket(username);
+    this.socket.addEventListener('message', this.onSocketMessage);
+  }
+
+  onSocketMessage = (event) => {
+    const message = JSON.parse(event.data);
+    
+    if (message.type === 'userList') {
+      this.updateUserList(message.users);
+    } else {
+      this.renderMessage(message);
+    }
   }
 
   renderMessage(message) {
-  const msgDiv = document.createElement('div');
-  msgDiv.classList.add('message');
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message');
 
-  // Позиционируем сообщения в зависимости от отправителя
-  if (message.sender === this.username) {
-    message.sender = 'you';
-    msgDiv.style.textAlign = 'right';
-  } else {
-    msgDiv.style.textAlign = 'left';
+    if (message.sender === this.username) {
+        message.sender = 'You';
+        msgDiv.style.textAlign = 'right';
+      } else {
+        msgDiv.style.textAlign = 'left';
+      }
+
+    switch(message.type) {
+      case 'join':
+        msgDiv.innerHTML = `<div class="message_info">${message.sender} присоединился к чату</div>`;
+        break;
+      case 'leave':
+        msgDiv.innerHTML = `<div class="message_info">${message.sender} покинул чат</div>`;
+        break;
+      case 'message':
+        msgDiv.innerHTML = `<div class="message_info">${message.sender}, ${message.time}</div>
+                            <div class="message_content">${message.content}</div>`;
+        if (message.sender === 'You') msgDiv.querySelector('.message_info').style.color = 'red';
+        break;
+      default:
+        msgDiv.textContent = JSON.stringify(message);
+    }
+
+    this.messagesContainer.append(msgDiv);
+    this.scrollToBottom(); 
   }
 
-  switch(message.type) {
-    case 'join':
-      msgDiv.innerHTML = `<em>${message.sender} присоединился к чату</em>`;
-      break;
-    case 'leave':
-      msgDiv.innerHTML = `<em>${message.content}</em>`;
-      break;
-    case 'message':
-      msgDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.content}, ${message.time}`;
-      break;
-    default:
-      msgDiv.textContent = JSON.stringify(message);
-  }
+  updateUserList(users) {
+    if (!this.usersContainer) return;
+    this.usersContainer.innerHTML = '';
 
-  this.messagesContainer.appendChild(msgDiv);
-  this.scrollToBottom(); // Прокручиваем список сообщений вниз
-}
+    console.log(users);
 
-  scrollToBottom() {
-    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-  }
+    users.forEach(user => {
+      const userElement = document.createElement('div');
+      userElement.classList.add('user_item');
 
-  connectWebsocket(username) {
-    this.socket = new WebSocket("ws://localhost:3030/ws");
-
-    this.socket.onopen = () => {
-      console.log("Подключён к сокету!");
-
-      this.sendMessage({
-        type: 'join', 
-        data: username,
-        sender: username
-      }); // Сообщаем о подключении нового пользователя
-    };
-
-    this.socket.onmessage = (e) => {
-      let message = JSON.parse(e.data);
-      console.log('message', message);
-      this.renderMessage(message);
-    };
-
-    this.socket.onclose = () => {
-      console.log("Отключился от сокета.");
-    };
-
-    this.socket.onerror = err => {
-      console.error("Ошибка сокета:", err);
-    };
+      userElement.insertAdjacentHTML('beforeend', this.createUser(user));
+      
+      if (user === this.username) {
+        userElement.querySelector('.user_name').style.color = 'red';
+      } 
+      
+      this.usersContainer.append(userElement);
+    });
   }
 
   sendMessage(data) {
@@ -93,22 +96,36 @@ export default class ChatPage {
   onSendMessage = (e) => {
     e.preventDefault();
     const text = this.messageInput.value.trim();
+
     console.log(text);
+
     if (text.length > 0) {
       this.sendMessage({type: 'message', sender: this.username, content: text});
-      this.messageInput.value = ''; // Очищаем поле ввода
+      this.messageInput.value = ''; 
     }
   }
 
   createElement() {
     return `
-      <div class="chat-container">
+      <div class="users_container"></div>
+      <div class="chat_container">
         <div class="messages"></div>
-        <form class="message-form">
-          <input type="text" class="message-input">
-          <button type="submit">Отправить</button>
+        <form class="message_form">
+          <input type="text" class="message_input">
+          <button type="submit" class="btn">Отправить</button>
         </form>
       </div>
     `;
+  }
+
+  createUser(user) {
+    return `
+        <div class="user_icon"></div>
+        <div class="user_name">${user}</div>
+    `;
+  }
+
+  scrollToBottom() {
+    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
   }
 }

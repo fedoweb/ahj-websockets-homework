@@ -1,6 +1,5 @@
 export default class IndexPage {
   constructor() {
-    //this.user = user;
     this.container = null;
   }
 
@@ -19,16 +18,6 @@ export default class IndexPage {
     modal.remove();
   }
 
-  createElement() {
-    return `
-      <form class="modal" id="modal">
-        <h2 for="username" class="modal_title">Выберите псевдоним</h2>
-        <input id="username" name="username" type="text" class="modal_content">
-        <button type="submit" class="modal_btn">Продолжить</button>
-      </form>
-    `;
-  }
-
   showError(message) {
     const error = this.container.querySelector('.error');
     if(error) error.remove();
@@ -40,6 +29,16 @@ export default class IndexPage {
   errorElement(message) {
     return `
     <div class="error">${message}</div>
+    `;
+  }
+
+  createElement() {
+    return `
+      <form class="modal_container" id="modal">
+        <h2 for="username" class="modal_title">Выберите псевдоним</h2>         
+        <input id="username" name="username" type="text" class="modal_content">
+        <button type="submit" class="modal_btn">Продолжить</button>       
+      </form>
     `;
   }
 }

@@ -1,44 +1,49 @@
-//import Router from "./router.js";
-//import { routes } from './routes.js';
 import IndexPage from "./IndexPage.js";
 import ChatPage from "./ChatPage.js";
-import User from "./UserName.js";
-
 export default class App {
   constructor(root) {
     this.root = root;
-    this.router = null;
-    this.user = new User();
     this.indexPage = new IndexPage();
     this.chatPage = new ChatPage();
-    //this.socket = null;
-
-
-    this.formData = null;
     this.form = null;
+    this.socket = null;
   }
 
   async init() {
+    this.socket = new WebSocket("ws://localhost:3030/ws");
+
     this.indexPage.init(this.root);
 
     this.form = this.root.querySelector('form');
     this.form.addEventListener('submit', this.onSubmit);
-    }
 
-    onSubmit = async (e) => {
+    this.socket.addEventListener('message', this.onSocketMessage);
+  }
+
+  onSubmit = (e) => {
     e.preventDefault();
+    const username = this.form.querySelector('input').value.trim();
+    
+    if (!username) return;
 
-    this.formData = new FormData(this.form);
-    const username = this.formData.get('username');
+    this.socket.send(JSON.stringify({
+      type: 'register',
+      username: username
+    }));
+  }
 
-    try {
-      const user = await this.user.create(username);
-      this.indexPage.closeModal();
-      this.chatPage.init(this.root, user.username);
-
-      //this.connectWebsocket(user.username);
-    } catch (error) {
-      this.indexPage.showError(error.message);
+  onSocketMessage = (event) => {
+    const message = JSON.parse(event.data);
+    
+    if (message.type === 'register') {
+      if (message.success) {
+       
+        this.indexPage.closeModal();
+        this.chatPage.init(this.root, message.username, this.socket);
+      } else {
+        
+        this.indexPage.showError(message.message);
+      }
     }
-  }  
+  }
 }
