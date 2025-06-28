@@ -750,7 +750,6 @@ var ChatPage = /*#__PURE__*/function () {
     value: function renderMessage(message) {
       var msgDiv = document.createElement('div');
       msgDiv.classList.add('message');
-      var formattedTime = this.formatTime(message.time);
       if (message.sender === this.username) {
         message.sender = 'You';
         msgDiv.style.textAlign = 'right';
@@ -759,12 +758,13 @@ var ChatPage = /*#__PURE__*/function () {
       }
       switch (message.type) {
         case 'join':
-          msgDiv.innerHTML = "<div class=\"message_info\">".concat(message.sender, " \u043F\u0440\u0438\u0441\u043E\u0435\u0434\u0438\u043D\u0438\u043B\u0441\u044F \u043A \u0447\u0430\u0442\u0443</div>");
+          msgDiv.innerHTML = "<div class=\"message_info\">".concat(message.content, "</div>");
           break;
         case 'leave':
-          msgDiv.innerHTML = "<div class=\"message_info\">".concat(message.sender, " \u043F\u043E\u043A\u0438\u043D\u0443\u043B \u0447\u0430\u0442</div>");
+          msgDiv.innerHTML = "<div class=\"message_info\">".concat(message.content, "</div>");
           break;
         case 'message':
+          var formattedTime = this.formatTime(message.time);
           msgDiv.innerHTML = "<div class=\"message_info\">".concat(message.sender, ", ").concat(formattedTime, "</div>\n                            <div class=\"message_content\">").concat(message.content, "</div>");
           if (message.sender === 'You') msgDiv.querySelector('.message_info').style.color = 'red';
           break;
@@ -812,6 +812,7 @@ var ChatPage = /*#__PURE__*/function () {
     key: "formatTime",
     value: function formatTime(isoString) {
       var date = new Date(isoString);
+      if (!date) return;
 
       // Автоматическое определение часового пояса пользователя
       var options = {
