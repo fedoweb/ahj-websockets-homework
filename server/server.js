@@ -61,8 +61,7 @@ wss.on('connection', socket => {
         sendMessage({
           type: 'join',
           sender: username,
-          content: `${username} присоединился к чату`,
-          time: message.time
+          content: `${username} присоединился к чату`
         });
 
         return;

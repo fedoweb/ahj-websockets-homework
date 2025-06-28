@@ -40,8 +40,6 @@ export default class ChatPage {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message');
 
-    const formattedTime = this.formatTime(message.time);
-
     if (message.sender === this.username) {
         message.sender = 'You';
         msgDiv.style.textAlign = 'right';
@@ -51,12 +49,14 @@ export default class ChatPage {
 
     switch(message.type) {
       case 'join':
-        msgDiv.innerHTML = `<div class="message_info">${message.sender} присоединился к чату</div>`;
+        msgDiv.innerHTML = `<div class="message_info">${message.content}</div>`;
         break;
-      case 'leave':
-        msgDiv.innerHTML = `<div class="message_info">${message.sender} покинул чат</div>`;
-        break;
+       case 'leave':
+         msgDiv.innerHTML = `<div class="message_info">${message.content}</div>`;
+         break;
       case 'message':
+        const formattedTime = this.formatTime(message.time);
+        
         msgDiv.innerHTML = `<div class="message_info">${message.sender}, ${formattedTime}</div>
                             <div class="message_content">${message.content}</div>`;
 
@@ -131,6 +131,8 @@ export default class ChatPage {
 
   formatTime(isoString) {
     const date = new Date(isoString);
+
+    if(!date) return;
     
     // Автоматическое определение часового пояса пользователя
     const options = {
